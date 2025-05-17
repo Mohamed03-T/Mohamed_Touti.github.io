@@ -4,6 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mohamed Touti's Portfolio</title>
+  <!-- تحميل ملف الترجمات -->
+  <script>
+    // التحقق من وجود ملف الترجمات وتحميله ديناميكيًا
+    function loadTranslations() {
+      if (typeof translations === 'undefined') {
+        const script = document.createElement('script');
+        script.src = './translations.js';
+        script.onerror = function() {
+          console.error('Failed to load translations.js');
+          // إنشاء كائن ترجمات فارغ لتجنب الأخطاء
+          window.translations = {
+            ar: { menu: {}, clock: {}, intro: {}, about: {}, experience: {}, skills: {}, projects: {}, contact: {} },
+            en: { menu: {}, clock: {}, intro: {}, about: {}, experience: {}, skills: {}, projects: {}, contact: {} }
+          };
+        };
+        document.head.appendChild(script);
+      }
+    }
+
+    // تحميل ملف الترجمات عند تحميل الصفحة
+    window.addEventListener('DOMContentLoaded', loadTranslations);
+  </script>
+  <script src="./translations.js"></script>
   <!-- إضافة مكتبة AOS -->
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
@@ -2050,7 +2073,7 @@
 <body>
   <!-- النافبار الأصلي للحواسيب - لن يتم تغييره -->
   <div class="top-bar desktop-navbar">
-    <img src="logo mt portflio.PNG" alt="Logo" class="logo">
+    <img src="./logo mt portflio.PNG" alt="Logo" class="logo" onerror="this.src='https://via.placeholder.com/150x50?text=Logo';this.onerror=null;">
 
     <!-- زر التوظيف -->
     <button onclick="openGmail()" class="hire-me-btn">Hire Me</button>
@@ -2126,7 +2149,7 @@
 
   <!-- نافبار جديد للهواتف فقط -->
   <div class="mobile-navbar">
-    <img src="logo mt portflio.PNG" alt="Logo" class="logo">
+    <img src="./logo mt portflio.PNG" alt="Logo" class="logo" onerror="this.src='https://via.placeholder.com/150x50?text=Logo';this.onerror=null;">
 
     <!-- زر التوظيف للهواتف -->
     <button onclick="openGmail()" class="hire-me-btn">Hire Me</button>
@@ -2376,9 +2399,25 @@
     // إضافة وظيفة تغيير اللغة
     let currentLang = 'ar';
 
+    // التحقق من وجود كائن الترجمات
+    if (typeof translations === 'undefined') {
+      console.error('Error: translations object is not defined. Make sure translations.js is loaded correctly.');
+      // إنشاء كائن ترجمات فارغ لتجنب الأخطاء
+      window.translations = {
+        ar: { menu: {}, clock: {}, intro: {}, about: {}, experience: {}, skills: {}, projects: {}, contact: {} },
+        en: { menu: {}, clock: {}, intro: {}, about: {}, experience: {}, skills: {}, projects: {}, contact: {} }
+      };
+    }
+
     function updateContent(lang) {
-      currentLang = lang;
-      const t = translations[lang];
+      try {
+        currentLang = lang;
+        // التحقق من وجود اللغة المطلوبة
+        if (!translations[lang]) {
+          console.error(`Error: Language '${lang}' is not defined in translations object.`);
+          return;
+        }
+        const t = translations[lang];
 
       // تحديث عناصر القائمة (للحواسيب والأجهزة المحمولة)
       document.querySelectorAll('.menu-items span, .mobile-menu-items span').forEach(item => {
@@ -2525,6 +2564,9 @@
 
       // حفظ اللغة المحددة
       localStorage.setItem('selectedLanguage', lang);
+      } catch (error) {
+        console.error('Error updating content:', error);
+      }
     }
 
     // إضافة مستمعي الأحداث لأزرار اللغة
