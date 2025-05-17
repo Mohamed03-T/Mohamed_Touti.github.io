@@ -1,0 +1,3073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mohamed Touti's Portfolio</title>
+  <!-- إضافة مكتبة AOS -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <!-- إضافة مكتبة Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <!-- إضافة مكتبة GLTFLoader -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <!-- إضافة ملف الترجمات -->
+  <script src="translations.js"></script>
+  <style>
+    /* الأنماط العامة للصفحة */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      background-color: #F8F9FE;
+      background-image:
+        radial-gradient(circle at 25% 25%, rgba(67, 97, 238, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(114, 9, 183, 0.05) 0%, transparent 50%),
+        linear-gradient(to bottom, rgba(248, 249, 254, 0.9), rgba(233, 236, 251, 0.95)),
+        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234361EE' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      color: #1A1A2E;
+      font-family: 'Arial', sans-serif;
+      overflow-x: hidden;
+      max-width: 100vw;
+      position: relative;
+    }
+
+    /* أنماط الشريط العلوي */
+    .top-bar {
+      width: 100%;
+      background-color: #1A1A2E;
+      padding: 5px 15px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 0 20px rgba(67, 97, 238, 0.15);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      gap: 15px;
+      height: 50px;
+      direction: ltr; /* إجبار اتجاه النص من اليسار إلى اليمين دائمًا */
+    }
+
+    /* أنماط النافبار للحواسيب والهواتف */
+    .desktop-navbar {
+      display: flex;
+      align-items: center;
+    }
+
+    .mobile-navbar {
+      display: none;
+      width: 100%;
+      background-color: #1A1A2E;
+      padding: 5px 15px;
+      align-items: center;
+      box-shadow: 0 0 20px rgba(67, 97, 238, 0.15);
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      gap: 15px;
+      height: 50px;
+      direction: ltr;
+    }
+
+    /* زر القائمة للهواتف */
+    .mobile-menu-toggle {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 30px;
+      height: 21px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      margin-left: auto;
+      z-index: 1001;
+    }
+
+    .mobile-menu-toggle span {
+      display: block;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(135deg, #00AEEF, #A4EB34);
+      border-radius: 3px;
+      transition: all 0.3s ease;
+    }
+
+    .mobile-menu-toggle.active span:nth-child(1) {
+      transform: translateY(9px) rotate(45deg);
+    }
+
+    .mobile-menu-toggle.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .mobile-menu-toggle.active span:nth-child(3) {
+      transform: translateY(-9px) rotate(-45deg);
+    }
+
+    /* القائمة المنسدلة للهواتف */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 50px;
+      right: -100%;
+      width: 100%;
+      height: auto;
+      max-height: 80vh;
+      overflow-y: auto;
+      background-color: rgba(26, 26, 46, 0.95);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      transition: right 0.3s ease;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+      border-bottom: 1px solid rgba(67, 97, 238, 0.2);
+    }
+
+    .mobile-menu.active {
+      right: 0;
+    }
+
+    /* قائمة اللغات للهواتف */
+    .mobile-language-menu {
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .mobile-language-header {
+      font-size: 18px;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .mobile-language-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .mobile-lang-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(67, 97, 238, 0.1);
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: white;
+    }
+
+    .mobile-lang-option img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+    }
+
+    .mobile-lang-option:hover {
+      background: rgba(67, 97, 238, 0.2);
+      transform: translateY(-3px);
+    }
+
+    .mobile-lang-option.active {
+      background: rgba(0, 174, 239, 0.3);
+      box-shadow: 0 5px 15px rgba(0, 174, 239, 0.2);
+    }
+
+    /* عناصر القائمة للهواتف */
+    .mobile-menu-items {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      margin-top: 15px;
+    }
+
+    .mobile-menu-items span {
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 15px;
+      background: rgba(67, 97, 238, 0.1);
+      border-radius: 8px;
+      margin: 5px 0;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      color: white;
+      font-weight: 500;
+    }
+
+    .mobile-menu-items span:hover {
+      background: rgba(67, 97, 238, 0.2);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(67, 97, 238, 0.2);
+    }
+
+    /* أنماط للأجهزة المحمولة */
+    @media (max-width: 768px) {
+      .desktop-navbar {
+        display: none;
+      }
+
+      .mobile-navbar {
+        display: flex;
+      }
+
+      .mobile-menu {
+        display: flex;
+      }
+    }
+
+    /* أنماط الشعار */
+    .logo {
+      height: 35px;
+      width: auto;
+    }
+
+    /* أنماط القائمة التفاعلية */
+    .menu-container {
+      position: relative;
+      width: 90px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1A1A2E;
+      border-radius: 25px;
+      padding: 6px;
+      cursor: pointer;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(67, 97, 238, 0.2);
+      margin-left: auto;
+      border: 1px solid rgba(181, 194, 252, 0.2);
+    }
+
+    .menu-container::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      background: linear-gradient(45deg, rgba(67, 97, 238, 0.05), rgba(114, 9, 183, 0.02));
+      filter: blur(4px);
+      z-index: -1;
+      opacity: 0.5;
+      transition: opacity 0.3s ease;
+      border-radius: 27px;
+    }
+
+    .menu-container::after {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      background: linear-gradient(45deg, rgba(114, 9, 183, 0.02), rgba(67, 97, 238, 0.05));
+      filter: blur(4px);
+      z-index: -1;
+      opacity: 0.5;
+      transition: opacity 0.3s ease;
+      border-radius: 27px;
+    }
+
+    .menu-container:hover {
+      width: 800px;
+      background: #1A1A2E;
+      box-shadow: 0 6px 20px rgba(67, 97, 238, 0.3);
+      border-color: rgba(181, 194, 252, 0.3);
+    }
+
+    .menu-container:hover::before,
+    .menu-container:hover::after {
+      opacity: 0.8;
+    }
+
+    /* أنماط عناصر القائمة */
+    .menu-items {
+      display: flex;
+      gap: 50px;
+      opacity: 0;
+      transform: translateX(-20px);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      color: white;
+      font-size: 13px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+      cursor: pointer;
+      white-space: nowrap;
+      direction: ltr; /* إجبار اتجاه النص من اليسار إلى اليمين دائمًا */
+    }
+
+    .menu-container:hover .menu-items {
+      opacity: 1;
+      transform: translateX(-50%);
+    }
+
+    .menu-items span {
+      position: relative;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .menu-items span:hover {
+      color: #4361EE;
+    }
+
+    .menu-items span::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: #7209B7;
+      transition: width 0.3s ease;
+    }
+
+    .menu-items span:hover::after {
+      width: 100%;
+    }
+
+    /* أنماط دائرة القائمة */
+    .menu-circle {
+      width: 25px;
+      height: 25px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #4361EE, #7209B7);
+      font-size: 14px;
+      transition: transform 0.3s ease;
+    }
+
+    .menu-container:hover .menu-circle {
+      transform: rotate(360deg);
+    }
+
+    /* أنماط دائرة التقدم */
+    .progress-circle {
+      width: 25px;
+      height: 25px;
+      position: relative;
+    }
+
+    .progress-circle svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .progress-circle circle {
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .progress-circle .background {
+      stroke: rgba(255, 255, 255, 0.1);
+    }
+
+    .progress-circle .progress {
+      stroke: #4361EE;
+      stroke-dasharray: 69;
+      stroke-dashoffset: 69;
+      transition: stroke-dashoffset 0.2s ease;
+    }
+
+    @media (max-width: 768px) {
+      .menu-container:hover {
+        width: 600px;
+      }
+
+      .menu-items {
+        gap: 20px;
+        font-size: 12px;
+      }
+
+      /* إخفاء ساعة الحاسوب فقط في النافبار الخاص بالحاسوب */
+      .desktop-navbar .clock-container {
+        display: none;
+      }
+
+      /* تعديل حجم ساعة الهواتف */
+      .mobile-navbar .clock-container {
+        margin-right: 5px;
+        margin-left: auto;
+      }
+
+      /* تصغير حجم دوائر الساعة في النافبار الخاص بالهواتف */
+      .mobile-navbar .circle {
+        width: 28px;
+        height: 28px;
+      }
+
+      .mobile-navbar .circle .value {
+        font-size: 0.75rem;
+      }
+
+      .mobile-navbar .circle .label {
+        font-size: 0.35rem;
+      }
+
+      .mobile-navbar .ampm {
+        font-size: 0.55rem;
+      }
+    }
+
+    /* أنماط حاوية الساعة - تصميم محسن وأصغر */
+    .clock-container {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      background-color: rgba(26, 26, 46, 0.8);
+      padding: 3px 6px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(67, 97, 238, 0.15);
+      position: relative;
+      z-index: 1;
+      margin-left: auto;
+      margin-right: 15px;
+      direction: ltr; /* إجبار اتجاه النص من اليسار إلى اليمين دائمًا */
+      border: 1px solid rgba(67, 97, 238, 0.1);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      transition: all 0.3s ease;
+    }
+
+    .clock-container:hover {
+      box-shadow: 0 3px 12px rgba(67, 97, 238, 0.25);
+      transform: translateY(-2px);
+      border-color: rgba(67, 97, 238, 0.2);
+    }
+
+    /* تأثير التوهج خلف الساعة */
+    .clock-container::before {
+      content: '';
+      position: absolute;
+      inset: -5px;
+      background: linear-gradient(45deg, #4361EE, #7209B7, #3CCFCF);
+      filter: blur(8px);
+      opacity: 0.1;
+      z-index: -1;
+      border-radius: 15px;
+      transition: opacity 0.3s ease;
+    }
+
+    .clock-container:hover::before {
+      opacity: 0.15;
+    }
+
+    /* أنماط دوائر الساعة */
+    .circle {
+      position: relative;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: bold;
+      color: white;
+      transition: transform 0.3s ease;
+    }
+
+    .circle:hover {
+      transform: scale(1.1);
+    }
+
+    /* تأثير التقدم في دوائر الساعة */
+    .circle::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, var(--circle-color) calc(var(--progress) * 1%), transparent 0%);
+      mask: radial-gradient(farthest-side, transparent 65%, black 66%);
+      -webkit-mask: radial-gradient(farthest-side, transparent 65%, black 66%);
+      filter: drop-shadow(0 0 3px var(--circle-color));
+      transition: filter 0.3s ease;
+    }
+
+    .circle:hover::before {
+      filter: drop-shadow(0 0 5px var(--circle-color));
+    }
+
+    /* ألوان دوائر الساعة */
+    .circle.hours {
+      --circle-color: #4361EE;
+    }
+
+    .circle.minutes {
+      --circle-color: #B5C2FC;
+    }
+
+    .circle.seconds {
+      --circle-color: #7209B7;
+    }
+
+    /* أنماط القيم في دوائر الساعة */
+    .circle .value {
+      z-index: 1;
+      font-size: 0.85rem;
+      margin-bottom: 0;
+      text-shadow: 0 0 3px var(--circle-color);
+      transition: text-shadow 0.3s ease;
+    }
+
+    .circle:hover .value {
+      text-shadow: 0 0 5px var(--circle-color);
+    }
+
+    .circle .label {
+      z-index: 1;
+      font-size: 0.4rem;
+      color: #ffffff;
+      opacity: 0.8;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    /* أنماط مؤشر AM/PM */
+    .ampm {
+      font-size: 0.6rem;
+      margin-left: 3px;
+      color: #ffffff;
+      text-shadow: 0 0 3px rgba(255, 255, 255, 0.5);
+      background: rgba(67, 97, 238, 0.2);
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .ampm:hover {
+      background: rgba(67, 97, 238, 0.3);
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+    }
+
+    /* أنماط المحتوى الرئيسي */
+    .main-content {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* أنماط الأقسام */
+    section {
+      background: rgba(26, 26, 46, 0.85);
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(0, 174, 239, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(164, 235, 52, 0.1) 0%, transparent 50%);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-radius: 25px;
+      padding: 45px;
+      margin-bottom: 70px;
+      box-shadow: 0 15px 35px rgba(0, 174, 239, 0.2), 0 0 25px rgba(164, 235, 52, 0.2);
+      border: 1px solid rgba(0, 174, 239, 0.2);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      color: #F4F5F7;
+    }
+
+    section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, #00AEEF, #A4EB34, #FFB6C1);
+      opacity: 0.8;
+      transition: all 0.5s ease;
+    }
+
+    section::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(0, 174, 239, 0.1) 0%, rgba(164, 235, 52, 0.05) 50%, rgba(244, 245, 247, 0) 70%);
+      filter: blur(30px);
+      z-index: -1;
+      opacity: 0.6;
+      transition: all 0.5s ease;
+    }
+
+    section:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(0, 174, 239, 0.15), 0 0 35px rgba(164, 235, 52, 0.1);
+      border-color: rgba(255, 182, 193, 0.3);
+    }
+
+    section:hover::before {
+      height: 7px;
+      background: linear-gradient(90deg, #00AEEF, #A4EB34, #FFB6C1);
+      opacity: 1;
+    }
+
+    section:hover::after {
+      width: 250px;
+      height: 250px;
+      opacity: 0.8;
+      filter: blur(40px);
+    }
+
+    /* أنماط العناوين */
+    h1, h2, h3 {
+      margin-bottom: 25px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      position: relative;
+      color: #F4F5F7;
+    }
+
+    h1 {
+      font-size: 3.5rem;
+      text-align: center;
+      background: linear-gradient(135deg, #00AEEF, #A4EB34);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 20px rgba(0, 174, 239, 0.6);
+      margin-bottom: 35px;
+      position: relative;
+      display: inline-block;
+    }
+
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0, 174, 239, 0.7), transparent);
+    }
+
+    h2 {
+      font-size: 2.4rem;
+      padding-bottom: 18px;
+      position: relative;
+      display: inline-block;
+      margin-bottom: 40px;
+      color: #00AEEF;
+      text-shadow: 0 0 15px rgba(0, 174, 239, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    h2::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      left: 0;
+      width: 40px;
+      height: 2px;
+      background: rgba(0, 174, 239, 0.5);
+      border-radius: 2px;
+    }
+
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, #00AEEF, transparent);
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+
+    section:hover h2 {
+      transform: translateX(5px);
+      text-shadow: 0 0 20px rgba(0, 174, 239, 0.4);
+    }
+
+    h3 {
+      font-size: 1.7rem;
+      color: #F4F5F7;
+      margin-top: 30px;
+      text-shadow: 0 0 15px rgba(0, 174, 239, 0.2);
+      position: relative;
+      padding-left: 18px;
+      transition: all 0.3s ease;
+    }
+
+    h3::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 6px;
+      height: 75%;
+      background: linear-gradient(to bottom, #00AEEF, #A4EB34);
+      border-radius: 3px;
+      transition: all 0.3s ease;
+    }
+
+    h3:hover {
+      transform: translateX(5px);
+      text-shadow: 0 0 15px rgba(0, 174, 239, 0.3);
+      color: #00AEEF;
+    }
+
+    h3:hover::before {
+      width: 8px;
+      box-shadow: 0 0 10px rgba(0, 174, 239, 0.5);
+    }
+
+    /* أنماط النصوص */
+    .intro-text {
+      font-size: 1.4rem;
+      color: #F4F5F7;
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 300;
+      letter-spacing: 0.6px;
+      line-height: 1.7;
+      text-shadow: 0 0 10px rgba(0, 174, 239, 0.2);
+      position: relative;
+      z-index: 1;
+    }
+
+    .intro-text::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0, 174, 239, 0.3), transparent);
+    }
+
+    .description {
+      line-height: 1.9;
+      color: #C4C4C4;
+      font-size: 1.15rem;
+      font-weight: 300;
+      letter-spacing: 0.4px;
+      position: relative;
+      padding: 5px 0;
+      transition: all 0.3s ease;
+    }
+
+    .description:hover {
+      color: #F4F5F7;
+      text-shadow: 0 0 8px rgba(0, 174, 239, 0.2);
+    }
+
+    p {
+      margin-bottom: 25px;
+      line-height: 1.9;
+      color: #C4C4C4;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    p:hover {
+      color: #F4F5F7;
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* أنماط قسم نبذة عني - About Me */
+    .about-section {
+      margin-top: 20px;
+    }
+
+    .about-content {
+      background: rgba(0, 174, 239, 0.08);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border-left: 4px solid #00AEEF;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .about-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 174, 239, 0.05), rgba(164, 235, 52, 0.05));
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: -1;
+    }
+
+    .about-content:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 35px rgba(0, 174, 239, 0.2);
+      border-left: 4px solid #A4EB34;
+    }
+
+    .about-content:hover::before {
+      opacity: 1;
+    }
+
+    .about-text {
+      font-size: 1.15rem;
+      line-height: 1.8;
+      color: #F4F5F7;
+      text-align: justify;
+      position: relative;
+      z-index: 1;
+      white-space: pre-line;
+    }
+
+    .about-text strong {
+      color: #00AEEF;
+      font-weight: 600;
+    }
+
+    .about-name {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #00AEEF;
+      margin-bottom: 15px;
+      display: block;
+      text-shadow: 0 0 10px rgba(0, 174, 239, 0.2);
+    }
+
+    .about-project {
+      margin-top: 10px;
+      padding-left: 15px;
+      border-left: 2px solid #A4EB34;
+    }
+
+    /* أنماط القوائم */
+    ul {
+      list-style-type: none;
+      padding-left: 5px;
+      margin: 30px 0;
+    }
+
+    ul li {
+      margin-bottom: 18px;
+      color: #C4C4C4;
+      position: relative;
+      padding-left: 35px;
+      font-size: 1.1rem;
+      line-height: 1.7;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      background: linear-gradient(90deg, rgba(0, 174, 239, 0.1), transparent);
+      padding: 12px 15px 12px 40px;
+      border-radius: 8px;
+      border-left: 1px solid rgba(0, 174, 239, 0.2);
+    }
+
+    ul li:hover {
+      transform: translateX(8px);
+      background: linear-gradient(90deg, rgba(0, 174, 239, 0.15), transparent);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      color: #F4F5F7;
+      border-left: 1px solid rgba(0, 174, 239, 0.5);
+    }
+
+    ul li::before {
+      content: "";
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 10px;
+      height: 10px;
+      background: linear-gradient(135deg, #00AEEF, #A4EB34);
+      border-radius: 50%;
+      box-shadow: 0 0 12px rgba(0, 174, 239, 0.6);
+      transition: all 0.3s ease;
+    }
+
+    ul li:hover::before {
+      transform: translateY(-50%) scale(1.2);
+      box-shadow: 0 0 15px rgba(0, 174, 239, 0.8);
+    }
+
+    /* أنماط الشبكات */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+      perspective: 1000px;
+    }
+
+    .skill-item {
+      background: rgba(0, 174, 239, 0.1);
+      background-image:
+        linear-gradient(135deg, rgba(0, 174, 239, 0.1), rgba(164, 235, 52, 0.1));
+      padding: 30px;
+      border-radius: 18px;
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border: 1px solid rgba(0, 174, 239, 0.3);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transform-style: preserve-3d;
+    }
+
+    .skill-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 174, 239, 0.08), rgba(164, 235, 52, 0.08));
+      opacity: 0;
+      z-index: -1;
+      transition: opacity 0.5s ease;
+    }
+
+    .skill-item::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 174, 239, 0.1) 0%, rgba(164, 235, 52, 0.05) 30%, transparent 60%);
+      opacity: 0;
+      z-index: -1;
+      transition: opacity 0.5s ease;
+      transform: translateZ(-10px);
+      pointer-events: none;
+    }
+
+    .skill-item:hover {
+      transform: translateY(-15px) scale(1.03) rotateX(5deg);
+      box-shadow: 0 20px 40px rgba(0, 174, 239, 0.15), 0 0 20px rgba(164, 235, 52, 0.15);
+      border-color: rgba(255, 182, 193, 0.3);
+      background-image:
+        linear-gradient(135deg, rgba(0, 174, 239, 0.05), rgba(164, 235, 52, 0.05));
+    }
+
+    .skill-item:hover::before {
+      opacity: 1;
+    }
+
+    .skill-item:hover::after {
+      opacity: 0.5;
+    }
+
+    .skill-item h3 {
+      margin-top: 0;
+      font-size: 1.5rem;
+      padding-left: 0;
+      margin-bottom: 20px;
+      position: relative;
+      display: inline-block;
+      color: #F4F5F7;
+    }
+
+    .skill-item h3::before {
+      display: none;
+    }
+
+    .skill-item h3::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 40px;
+      height: 2px;
+      background: linear-gradient(90deg, #00AEEF, transparent);
+      transition: width 0.3s ease;
+    }
+
+    .skill-item:hover h3::after {
+      width: 100%;
+    }
+
+    .skill-item p {
+      margin-bottom: 0;
+      color: #C4C4C4;
+      font-size: 1.05rem;
+      line-height: 1.7;
+      transition: all 0.3s ease;
+    }
+
+    .skill-item:hover p {
+      color: #F4F5F7;
+      text-shadow: 0 0 8px rgba(0, 174, 239, 0.3);
+    }
+
+    /* أنماط قوائم المهارات */
+    .skill-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .skill-list li {
+      position: relative;
+      padding: 10px 15px 10px 35px;
+      margin-bottom: 12px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      color: #C4C4C4;
+      font-size: 1rem;
+      line-height: 1.6;
+      border-left: 1px solid rgba(0, 174, 239, 0.2);
+    }
+
+    .skill-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    .skill-list li::before {
+      content: "•";
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #00AEEF;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+    }
+
+    .skill-list li:hover {
+      background: rgba(0, 174, 239, 0.1);
+      transform: translateX(5px);
+      color: #F4F5F7;
+      border-left: 1px solid rgba(0, 174, 239, 0.5);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .skill-list li:hover::before {
+      color: #A4EB34;
+      transform: translateY(-50%) scale(1.2);
+    }
+
+    .skill-list li strong {
+      color: #00AEEF;
+      font-weight: 600;
+      margin-right: 5px;
+      transition: all 0.3s ease;
+    }
+
+    .skill-list li:hover strong {
+      color: #A4EB34;
+      text-shadow: 0 0 8px rgba(164, 235, 52, 0.3);
+    }
+
+    /* أنماط عناصر المشاريع */
+    .project-item {
+      background: linear-gradient(135deg, rgba(0, 174, 239, 0.15), rgba(0, 0, 0, 0.2));
+      border-left: 3px solid rgba(164, 235, 52, 0.5);
+      padding: 35px;
+    }
+
+    .project-item::before {
+      background: linear-gradient(135deg, rgba(0, 174, 239, 0.2), rgba(255, 182, 193, 0.2));
+    }
+
+    .project-item h3 {
+      color: #F4F5F7;
+      -webkit-text-fill-color: initial;
+      background: none;
+      text-shadow: 0 0 10px rgba(0, 174, 239, 0.5);
+      font-size: 1.4rem;
+      margin-bottom: 25px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .project-item h3::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 50px;
+      height: 2px;
+      background: linear-gradient(90deg, #00AEEF, #A4EB34);
+      transition: width 0.3s ease;
+    }
+
+    .project-item:hover h3::after {
+      width: 100%;
+    }
+
+    .project-item:hover {
+      border-left: 3px solid rgba(164, 235, 52, 0.9);
+      box-shadow: 0 20px 40px rgba(0, 174, 239, 0.2), 0 0 25px rgba(255, 182, 193, 0.3);
+      transform: translateY(-15px) scale(1.02);
+    }
+
+    .project-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .project-list li {
+      position: relative;
+      padding: 15px 15px 15px 35px;
+      margin-bottom: 15px;
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 12px;
+      transition: all 0.4s ease;
+      color: #C4C4C4;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      border-left: 1px solid rgba(0, 174, 239, 0.3);
+    }
+
+    .project-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    .project-list li::before {
+      content: "•";
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #A4EB34;
+      font-size: 1.3rem;
+      transition: all 0.3s ease;
+    }
+
+    .project-list li:hover {
+      background: rgba(0, 174, 239, 0.15);
+      transform: translateX(10px);
+      color: #F4F5F7;
+      border-left: 1px solid rgba(164, 235, 52, 0.5);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .project-list li:hover::before {
+      color: #00AEEF;
+      transform: translateY(-50%) scale(1.3);
+      text-shadow: 0 0 10px rgba(0, 174, 239, 0.5);
+    }
+
+
+
+    /* أنماط معلومات الاتصال */
+    .contact-info {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      margin-top: 40px;
+      position: relative;
+    }
+
+    .contact-info::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0, 174, 239, 0.3), rgba(164, 235, 52, 0.3), transparent);
+    }
+
+    .contact-info p {
+      background: rgba(0, 174, 239, 0.1);
+      background-image:
+        linear-gradient(135deg, rgba(0, 174, 239, 0.1), rgba(164, 235, 52, 0.1));
+      padding: 25px 30px;
+      border-radius: 18px;
+      border: 1px solid rgba(0, 174, 239, 0.3);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      align-items: center;
+      font-size: 1.15rem;
+      color: #F4F5F7;
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .contact-info p::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(to bottom, #00AEEF, #A4EB34);
+      opacity: 0.7;
+      transition: width 0.3s ease;
+    }
+
+    .contact-info p::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 174, 239, 0.15), rgba(164, 235, 52, 0.15));
+      opacity: 0;
+      z-index: -1;
+      transition: opacity 0.5s ease;
+    }
+
+    .contact-info p:hover {
+      transform: translateX(15px) scale(1.02);
+      background: rgba(0, 174, 239, 0.2);
+      border-color: rgba(0, 174, 239, 0.4);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2), 0 0 20px rgba(0, 174, 239, 0.3);
+    }
+
+    .contact-info p:hover::before {
+      width: 8px;
+    }
+
+    .contact-info p:hover::after {
+      opacity: 1;
+    }
+
+    .contact-info a {
+      color: #00AEEF;
+      text-decoration: none;
+      transition: all 0.4s ease;
+      position: relative;
+      margin-left: 15px;
+      font-weight: 500;
+      padding: 5px 10px;
+      border-radius: 8px;
+      background: rgba(0, 174, 239, 0.05);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .contact-info a::before {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #00AEEF, #A4EB34);
+      transition: width 0.4s ease;
+      opacity: 0.7;
+    }
+
+    .contact-info a::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0, 174, 239, 0.2), rgba(164, 235, 52, 0.2));
+      border-radius: 8px;
+      opacity: 0;
+      z-index: -1;
+      transition: opacity 0.4s ease;
+    }
+
+    .contact-info a:hover {
+      color: #33373E;
+      text-shadow: 0 0 15px rgba(0, 174, 239, 0.6);
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .contact-info a:hover::before {
+      width: 100%;
+    }
+
+    .contact-info a:hover::after {
+      opacity: 1;
+    }
+
+    /* أنماط التجاوب */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 0 25px;
+      }
+
+      section {
+        padding: 35px 30px;
+        margin-bottom: 50px;
+        border-radius: 20px;
+      }
+
+      h1 {
+        font-size: 2.8rem;
+      }
+
+      h2 {
+        font-size: 2rem;
+        margin-bottom: 35px;
+      }
+
+      h3 {
+        font-size: 1.5rem;
+      }
+
+      .intro-text {
+        font-size: 1.25rem;
+      }
+
+      .skills-grid {
+        grid-template-columns: 1fr;
+        gap: 25px;
+      }
+
+      .skill-item {
+        padding: 25px;
+        transform: none !important;
+      }
+
+      .skill-item:hover {
+        transform: translateY(-10px) !important;
+      }
+
+      .contact-info p {
+        padding: 20px 25px;
+      }
+
+      ul li {
+        padding: 10px 15px 10px 35px;
+      }
+
+      ul li::before {
+        left: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main-content {
+        padding: 0 20px;
+      }
+
+      section {
+        padding: 30px 25px;
+        margin-bottom: 40px;
+      }
+
+      h1 {
+        font-size: 2.4rem;
+      }
+
+      h2 {
+        font-size: 1.8rem;
+        padding-bottom: 15px;
+        margin-bottom: 30px;
+      }
+
+      h3 {
+        font-size: 1.4rem;
+        padding-left: 15px;
+      }
+
+      .intro-text {
+        font-size: 1.15rem;
+        line-height: 1.6;
+      }
+
+      .description {
+        font-size: 1.05rem;
+        line-height: 1.7;
+      }
+
+      .contact-info p {
+        font-size: 1.05rem;
+        padding: 18px 20px;
+      }
+
+      .contact-info a {
+        margin-left: 10px;
+        padding: 4px 8px;
+      }
+
+      ul li {
+        font-size: 1.05rem;
+        padding: 10px 15px 10px 32px;
+        line-height: 1.6;
+      }
+
+      ul li::before {
+        width: 8px;
+        height: 8px;
+        left: 10px;
+      }
+
+      .skill-item {
+        padding: 22px;
+      }
+
+      .skill-item h3 {
+        font-size: 1.35rem;
+      }
+    }
+
+    /* Animation styles for scroll effects */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+
+
+    /* تأثير نبض للساعة */
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* أنماط قسم الخبرة العملية */
+    .experience-section {
+      margin-top: 50px;
+    }
+
+    .experience-item {
+      background: rgba(0, 174, 239, 0.05);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      transition: all 0.4s ease;
+      border-left: 4px solid #00AEEF;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .experience-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(0, 174, 239, 0.05), rgba(164, 235, 52, 0.05));
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: 0;
+    }
+
+    .experience-item:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0, 174, 239, 0.15);
+      border-left: 4px solid #A4EB34;
+    }
+
+    .experience-item:hover::before {
+      opacity: 1;
+    }
+
+    .experience-item h3 {
+      color: #00AEEF;
+      margin-bottom: 20px;
+      font-size: 1.3rem;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-shadow: 0 0 10px rgba(0, 174, 239, 0.2);
+    }
+
+    .experience-list {
+      margin-top: 15px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .experience-list li {
+      position: relative;
+      padding: 12px 15px 12px 35px;
+      margin-bottom: 15px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      color: #F4F5F7;
+      font-size: 1rem;
+      line-height: 1.6;
+      border-left: 1px solid rgba(0, 174, 239, 0.2);
+    }
+
+    .experience-list li:last-child {
+      margin-bottom: 0;
+    }
+
+    .experience-list li::before {
+      content: "•";
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #00AEEF;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+    }
+
+    .experience-list li:hover {
+      background: rgba(0, 174, 239, 0.1);
+      transform: translateX(8px);
+      color: #F4F5F7;
+      border-left: 1px solid rgba(0, 174, 239, 0.5);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .experience-list li:hover::before {
+      color: #A4EB34;
+      transform: translateY(-50%) scale(1.2);
+    }
+
+    /* تأثير نبض للعنوان الرئيسي */
+    @keyframes titleGlow {
+      0% {
+        text-shadow: 0 0 10px rgba(114,9,183,0.5);
+      }
+      50% {
+        text-shadow: 0 0 20px rgba(114,9,183,0.8), 0 0 30px rgba(67,97,238,0.5);
+      }
+      100% {
+        text-shadow: 0 0 10px rgba(114,9,183,0.5);
+      }
+    }
+
+    /* تأثير نبض لمؤشر التمرير */
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0) translateX(-50%);
+      }
+      40% {
+        transform: translateY(-10px) translateX(-50%);
+      }
+      60% {
+        transform: translateY(-5px) translateX(-50%);
+      }
+    }
+
+    @keyframes fadeInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes fadeInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* Enhanced AOS animations */
+    [data-aos="custom-fade-up"] {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.8s ease;
+    }
+
+    [data-aos="custom-fade-up"].aos-animate {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    [data-aos="custom-fade-left"] {
+      opacity: 0;
+      transform: translateX(-30px);
+      transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.8s ease;
+    }
+
+    [data-aos="custom-fade-left"].aos-animate {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    [data-aos="custom-fade-right"] {
+      opacity: 0;
+      transform: translateX(30px);
+      transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.8s ease;
+    }
+
+    [data-aos="custom-fade-right"].aos-animate {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    [data-aos="custom-scale-in"] {
+      opacity: 0;
+      transform: scale(0.9);
+      transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.8s ease;
+    }
+
+    [data-aos="custom-scale-in"].aos-animate {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* تحديث أنماط قسم المقدمة */
+    .intro-section {
+      min-height: 100vh;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0;
+      background: #F4F5F7;
+      border-radius: 15px;
+      position: relative;
+      overflow: hidden;
+      margin-top: 70px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .intro-text-content {
+      width: 100%;
+      padding: 30px 20px;
+      z-index: 2;
+      background: transparent;
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .intro-text-content h1 {
+      font-size: 4.5rem;
+      margin-bottom: 20px;
+      color: #33373E;
+      text-shadow: 0 0 10px rgba(0, 174, 239, 0.3);
+      font-weight: bold;
+    }
+
+    .intro-text-content .intro-text {
+      font-size: 1.6rem;
+      color: #00AEEF;
+      margin: 0;
+      text-align: center;
+    }
+
+    .intro-model-container {
+      flex: 1;
+      width: 100%;
+      height: calc(100vh - 180px);
+      position: relative;
+      z-index: 1;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .intro-model-container::before {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+      filter: blur(30px);
+      z-index: -1;
+      bottom: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: glowPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes glowPulse {
+      0% {
+        opacity: 0.4;
+        transform: translateX(-50%) scale(1);
+      }
+      50% {
+        opacity: 0.6;
+        transform: translateX(-50%) scale(1.1);
+      }
+      100% {
+        opacity: 0.4;
+        transform: translateX(-50%) scale(1);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .intro-section {
+        margin-top: 60px;
+      }
+
+      .intro-text-content {
+        padding: 20px;
+      }
+
+      .intro-text-content h1 {
+        font-size: 3rem;
+      }
+
+      .intro-text-content .intro-text {
+        font-size: 1.2rem;
+      }
+
+      .intro-model-container {
+        height: calc(100vh - 160px);
+      }
+
+    }
+
+    /* تحسينات للمجسم ثلاثي الأبعاد */
+    .spline-model {
+      width: 100% !important;
+      height: 100% !important;
+      transition: opacity 0.5s ease;
+    }
+
+    /* تحسينات خاصة بالمجسم على الأجهزة المحمولة */
+    @media (max-width: 768px) {
+      #mobile-spline-iframe {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        z-index: 1 !important;
+      }
+    }
+
+    /* تحديث أنماط الأقسام الأخرى */
+    section:not(.intro-section) {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.6s ease-out;
+    }
+
+    section:not(.intro-section).aos-animate {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* أنماط قسم المجسم ثلاثي الأبعاد */
+    .model-section {
+      position: relative;
+      height: 800px;
+      width: 100%;
+      overflow: hidden;
+      background: #000000;
+      margin: 40px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #model-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .loading-indicator {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #ff4081;
+      font-size: 1.2rem;
+      z-index: 1000;
+    }
+
+    .model-controls {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+
+    .model-button {
+      padding: 10px 20px;
+      background: rgba(255, 64, 129, 0.2);
+      border: 1px solid rgba(255, 64, 129, 0.5);
+      border-radius: 25px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .model-button:hover {
+      background: rgba(255, 64, 129, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .model-title {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 2rem;
+      text-align: center;
+      z-index: 100;
+      text-shadow: 0 0 10px rgba(255, 64, 129, 0.5);
+    }
+
+    /* أنماط قائمة اللغات */
+    .language-menu {
+      position: relative;
+      margin: 0 20px;
+      display: flex;
+      align-items: center;
+      direction: ltr; /* إجبار اتجاه النص من اليسار إلى اليمين دائمًا */
+    }
+
+    .language-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 5px;
+      display: flex;
+      align-items: center;
+      transition: transform 0.3s ease;
+    }
+
+    .language-btn img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .language-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .language-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: #000000;
+      border-radius: 8px;
+      padding: 8px;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 40px;
+      box-shadow: 0 0 20px rgba(255, 64, 129, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 1000;
+    }
+
+    .language-menu:hover .language-dropdown {
+      display: flex;
+    }
+
+    .lang-option {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 5px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+    }
+
+    .lang-option img {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .lang-option:hover {
+      transform: scale(1.1);
+      background: rgba(255, 64, 129, 0.2);
+      border-radius: 4px;
+    }
+
+    .lang-option.active {
+      background: rgba(255, 64, 129, 0.3);
+      border-radius: 4px;
+    }
+
+    /* أنماط زر التوظيف - تم تحديثها لتعمل مع عنصر button */
+    .hire-me-btn {
+      background: linear-gradient(135deg, #00AEEF, #A4EB34);
+      color: white;
+      padding: 8px 15px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(0, 174, 239, 0.3);
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 15px;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-family: 'Arial', sans-serif;
+      outline: none;
+    }
+
+    /* إخفاء زر التوظيف الإضافي في القائمة المنسدلة على الشاشات الكبيرة */
+    .hire-me-btn-mobile {
+      display: none;
+    }
+
+    .hire-me-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: all 0.5s ease;
+    }
+
+    .hire-me-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 174, 239, 0.4);
+      background: linear-gradient(135deg, #00AEEF, #7209B7);
+    }
+
+    .hire-me-btn:hover::before {
+      left: 100%;
+    }
+
+    .hire-me-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 10px rgba(0, 174, 239, 0.3);
+    }
+
+    /* تحسين التجاوب للأجهزة المحمولة */
+    @media (max-width: 768px) {
+      .hire-me-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+        margin-left: 10px;
+        white-space: nowrap;
+      }
+
+      /* تحسين مظهر زر التوظيف في القائمة المنسدلة */
+      .nav-items.active .hire-me-btn-mobile {
+        display: flex;
+        margin: 15px auto;
+        padding: 10px 20px;
+        font-size: 16px;
+        width: 80%;
+        max-width: 250px;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hire-me-btn {
+        padding: 5px 10px;
+        font-size: 11px;
+        margin-left: 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- النافبار الأصلي للحواسيب - لن يتم تغييره -->
+  <div class="top-bar desktop-navbar">
+    <img src="logo mt portflio.PNG" alt="Logo" class="logo">
+
+    <!-- زر التوظيف -->
+    <button onclick="openGmail()" class="hire-me-btn">Hire Me</button>
+
+    <!-- قائمة اللغات -->
+    <div class="language-menu">
+      <button class="language-btn">
+        <img src="https://flagcdn.com/w40/sa.png" alt="Current Language" id="currentFlag">
+      </button>
+      <div class="language-dropdown">
+        <button class="lang-option active" data-lang="ar">
+          <img src="https://flagcdn.com/w40/sa.png" alt="Arabic">
+        </button>
+        <button class="lang-option" data-lang="en">
+          <img src="https://flagcdn.com/w40/gb.png" alt="English">
+        </button>
+        <button class="lang-option" data-lang="fr">
+          <img src="https://flagcdn.com/w40/fr.png" alt="French">
+        </button>
+        <button class="lang-option" data-lang="es">
+          <img src="https://flagcdn.com/w40/es.png" alt="Spanish">
+        </button>
+        <button class="lang-option" data-lang="ru">
+          <img src="https://flagcdn.com/w40/ru.png" alt="Russian">
+        </button>
+        <button class="lang-option" data-lang="zh">
+          <img src="https://flagcdn.com/w40/cn.png" alt="Chinese">
+        </button>
+        <button class="lang-option" data-lang="de">
+          <img src="https://flagcdn.com/w40/de.png" alt="German">
+        </button>
+        <button class="lang-option" data-lang="it">
+          <img src="https://flagcdn.com/w40/it.png" alt="Italian">
+        </button>
+      </div>
+    </div>
+
+    <!-- القائمة الرئيسية -->
+    <div class="menu-container" id="menuContainer">
+      <div class="menu-circle">💡</div>
+      <div class="menu-items">
+        <span data-section="about-section">نبذة عني</span>
+        <span data-section="experience-section">الخبرة</span>
+        <span data-section="skills-section">المهارات</span>
+        <span data-section="projects-section">المشاريع</span>
+        <span data-section="contact-section">اتصل بنا</span>
+      </div>
+      <div class="progress-circle">
+        <svg viewBox="0 0 25 25">
+          <circle class="background" cx="12.5" cy="12.5" r="11"/>
+          <circle class="progress" cx="12.5" cy="12.5" r="11"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- الساعة -->
+    <div class="clock-container">
+      <div class="circle hours" id="hours">
+        <div class="value">12</div>
+        <div class="label">Hours</div>
+      </div>
+      <div class="circle minutes" id="minutes">
+        <div class="value">12</div>
+        <div class="label">Minutes</div>
+      </div>
+      <div class="circle seconds" id="seconds">
+        <div class="value">58</div>
+        <div class="label">Seconds</div>
+      </div>
+      <div class="ampm" id="ampm">PM</div>
+    </div>
+  </div>
+
+  <!-- نافبار جديد للهواتف فقط -->
+  <div class="mobile-navbar">
+    <img src="logo mt portflio.PNG" alt="Logo" class="logo">
+
+    <!-- زر التوظيف للهواتف -->
+    <button onclick="openGmail()" class="hire-me-btn">Hire Me</button>
+
+    <!-- الساعة للهواتف - نفس تصميم ساعة الحاسوب -->
+    <div class="clock-container">
+      <div class="circle hours" id="mobile-hours">
+        <div class="value">12</div>
+        <div class="label">Hours</div>
+      </div>
+      <div class="circle minutes" id="mobile-minutes">
+        <div class="value">12</div>
+        <div class="label">Minutes</div>
+      </div>
+      <div class="circle seconds" id="mobile-seconds">
+        <div class="value">58</div>
+        <div class="label">Seconds</div>
+      </div>
+      <div class="ampm" id="mobile-ampm">PM</div>
+    </div>
+
+    <!-- زر القائمة للهواتف -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <!-- القائمة المنسدلة للهواتف -->
+    <div class="mobile-menu" id="mobileMenu">
+      <!-- قائمة اللغات للهواتف -->
+      <div class="mobile-language-menu">
+        <div class="mobile-language-header">اختر اللغة</div>
+        <div class="mobile-language-options">
+          <button class="mobile-lang-option active" data-lang="ar">
+            <img src="https://flagcdn.com/w40/sa.png" alt="Arabic">
+            <span>العربية</span>
+          </button>
+          <button class="mobile-lang-option" data-lang="en">
+            <img src="https://flagcdn.com/w40/gb.png" alt="English">
+            <span>English</span>
+          </button>
+          <button class="mobile-lang-option" data-lang="fr">
+            <img src="https://flagcdn.com/w40/fr.png" alt="French">
+            <span>Français</span>
+          </button>
+          <button class="mobile-lang-option" data-lang="es">
+            <img src="https://flagcdn.com/w40/es.png" alt="Spanish">
+            <span>Español</span>
+          </button>
+          <button class="mobile-lang-option" data-lang="ru">
+            <img src="https://flagcdn.com/w40/ru.png" alt="Russian">
+            <span>Русский</span>
+          </button>
+          <button class="mobile-lang-option" data-lang="zh">
+            <img src="https://flagcdn.com/w40/cn.png" alt="Chinese">
+            <span>中文</span>
+          </button>
+          <button class="mobile-lang-option" data-lang="de">
+            <img src="https://flagcdn.com/w40/de.png" alt="German">
+            <span>Deutsch</span>
+          </button>
+          <button class="mobile-lang-option" data-lang="it">
+            <img src="https://flagcdn.com/w40/it.png" alt="Italian">
+            <span>Italiano</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- عناصر القائمة للهواتف -->
+      <div class="mobile-menu-items">
+        <span data-section="about-section">نبذة عني</span>
+        <span data-section="experience-section">الخبرة</span>
+        <span data-section="skills-section">المهارات</span>
+        <span data-section="projects-section">المشاريع</span>
+        <span data-section="contact-section">اتصل بنا</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openGmail() {
+      // فتح Gmail مباشرة مع عنوان البريد الإلكتروني المُعبأ مسبقًا
+      window.open('https://mail.google.com/mail/?view=cm&fs=1&to=medev.codes@gmail.com&su=Job+Opportunity&body=Hello+Mohamed,+I+would+like+to+discuss+a+job+opportunity+with+you.', '_blank');
+    }
+  </script>
+
+  <!-- المحتوى الرئيسي -->
+  <div class="main-content">
+    <!-- قسم المقدمة - بداية -->
+  <div style="position: fixed; width: 100vw; height: 100vh; overflow: hidden; background-color: #F8F9FE; left: 0; right: 0; top: 0; z-index: 0;">
+    <!-- المجسم ثلاثي الأبعاد للحواسيب - يظهر فقط على الشاشات الكبيرة -->
+    <iframe id="desktop-spline-iframe" class="spline-model" src="https://my.spline.design/claritystream-FR15b3Gl3Q9ACPcxodCmsqnt/"
+     frameborder="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; overflow: hidden; display: none; opacity: 0;" allow="autoplay; fullscreen" loading="lazy"></iframe>
+
+    <!-- المجسم ثلاثي الأبعاد للهواتف - يظهر فقط على الأجهزة المحمولة ويأخذ كامل الشاشة -->
+    <iframe id="mobile-spline-iframe" class="spline-model" src="https://my.spline.design/claritystream-mdxLI8yaV2Q5HXE9KDhNpmpK/"
+     frameborder="0" width="100%" height="100%" style="display: none; opacity: 0;" allow="autoplay; fullscreen" loading="lazy"></iframe>
+
+    <!-- مؤشر تحميل المجسم -->
+    <div id="model-loader" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; z-index: 5;">
+      <div style="width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #3CCFCF; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+      <p style="margin-top: 15px; color: #3CCFCF; font-weight: 500;">جاري تحميل المجسم...</p>
+    </div>
+
+    <style>
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    </style>
+
+    <!-- مؤشر التمرير للأسفل -->
+    <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; animation: bounce 2s infinite; cursor: pointer; z-index: 10;" id="scroll-down-indicator">
+      <span style="font-size: 1rem; color: #3CCFCF; text-shadow: 0 0 10px rgba(67,97,238,0.6); font-weight: 500; transition: all 0.3s ease;" onmouseover="this.style.color='#7209B7'; this.style.textShadow='0 0 15px rgba(60,207,207,0.8)';" onmouseout="this.style.color='#3CCFCF'; this.style.textShadow='0 0 10px rgba(67,97,238,0.6)';">اسحب للأسفل</span>
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transition: all 0.3s ease;" onmouseover="this.querySelector('path').setAttribute('stroke', '#7209B7');" onmouseout="this.querySelector('path').setAttribute('stroke', '#3CCFCF');">
+        <path d="M12 5V19M12 19L5 12M12 19L19 12" stroke="#3CCFCF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+  <!-- قسم المقدمة - نهاية -->
+
+  <!-- مساحة فارغة لضمان ظهور الأقسام الأخرى بعد القسم الأول -->
+  <div style="height: 100vh; width: 100%;"></div>
+
+    <!-- قسم نبذة عني - About Me -->
+    <section class="about-section" data-aos="custom-fade-up">
+      <h2 id="about-title">👨‍💻 نبذة عني</h2>
+      <div class="about-content" data-aos="custom-fade-up" data-aos-delay="100">
+        <p id="about-text" class="about-text">
+          <span class="about-name">محمد توتي</span>
+مبرمج ومصمم مواقع إلكترونية محترف، متخصص في تطوير تطبيقات الويب وسطح المكتب والهاتف. أؤمن بأن التفاصيل هي التي تصنع الفرق، وأسعى دائمًا لدمج الإبداع مع الأداء لتحقيق تجارب مستخدم مميزة. لدي خبرة واسعة في بناء تطبيقات متكاملة باستخدام <strong>React</strong>, <strong>Next.js</strong>, <strong>JavaFX</strong>, <strong>Java EE</strong>, <strong>Prisma</strong>, <strong>MySQL</strong>, <strong>TypeScript</strong>، مع اهتمام خاص بتحقيق تجربة مستخدم سلسة وتصميم واجهات احترافية.
+
+كمؤسس لفريق <strong>Medev Team</strong>، أدير فرق تطوير متكاملة وأعمل عن قرب مع العملاء لتحقيق حلول مبتكرة تلبي احتياجاتهم. من أبرز مشاريعي:
+
+<span class="about-project"><strong>نظام تتبع الحافلات:</strong> تطبيق متكامل يعتمد على JavaFX وMySQL مع API مخصص، يقدم حلولًا دقيقة لتتبع المركبات وإدارة الرحلات بكفاءة.</span>
+
+<span class="about-project"><strong>متجر إلكتروني متكامل:</strong> تم تطويره باستخدام Next.js وPrisma، مع دعم لأحدث تقنيات المصادقة وتكامل قواعد البيانات لضمان تجربة تسوق مميزة وسريعة.</span>
+
+<span class="about-project"><strong>تطبيق تجارة الجملة:</strong> تطبيق مشابه لمنصة السمار، يتيح لأصحاب الأعمال بيع المنتجات بالجملة بسهولة ومرونة.</span>
+
+أطمح لتطوير مهاراتي في الأتمتة بالذكاء الاصطناعي وتقديم حلول تقنية متقدمة تساهم في تغيير صناعة البرمجيات.
+        </p>
+      </div>
+    </section>
+
+    <!-- قسم الخبرة العملية -->
+    <section class="experience-section" data-aos="custom-fade-up">
+      <h2>💼 الخبرة العملية</h2>
+      <div class="experience-item" data-aos="custom-fade-left" data-aos-delay="100">
+        <h3>🔹 مبرمج ومطور تطبيقات (Software Developer)</h3>
+        <ul class="experience-list">
+          <li data-aos="custom-fade-left" data-aos-delay="150">خبرة في تطوير تطبيقات سطح المكتب باستخدام JavaFX مع تصميم واجهات احترافية وتجربة مستخدم مميزة.</li>
+          <li data-aos="custom-fade-left" data-aos-delay="180">تطوير تطبيقات الويب باستخدام Java EE مع دعم للتكامل مع قواعد البيانات MySQL.</li>
+          <li data-aos="custom-fade-left" data-aos-delay="210">بناء تطبيقات Android (قيد التعلم) مع التركيز على الأداء وتجربة المستخدم.</li>
+          <li data-aos="custom-fade-left" data-aos-delay="240">تصميم وتطوير أنظمة إدارة بيانات متكاملة باستخدام MySQL + API لتحسين سرعة الوصول إلى البيانات ومعالجتها.</li>
+          <li data-aos="custom-fade-left" data-aos-delay="270">تطوير تطبيقات مبتكرة مثل نظام تتبع الحافلات لتحليل حالات الحافلات وتتبع عدد الركاب بكفاءة.</li>
+        </ul>
+      </div>
+      <div class="experience-item" data-aos="custom-fade-left" data-aos-delay="300">
+        <h3>🔹 التجارة والتسويق الإلكتروني (E-commerce & Digital Marketing)</h3>
+        <ul class="experience-list">
+          <li data-aos="custom-fade-left" data-aos-delay="330">خبرة في التسويق الإلكتروني والتسويق بالعمولة باستخدام أدوات متقدمة.</li>
+          <li data-aos="custom-fade-left" data-aos-delay="360">تحليل البيانات لتحسين حملات التسويق وزيادة العائد على الاستثمار.</li>
+          <li data-aos="custom-fade-left" data-aos-delay="390">استخدام أدوات الذكاء الاصطناعي لأتمتة العمليات التسويقية وتحليل سلوك العملاء.</li>
+          <li data-aos="custom-fade-left" data-aos-delay="420">تصميم وإطلاق متاجر إلكترونية باستخدام Next.js, Prisma, Tailwind CSS مع دعم كامل لتجربة المستخدم.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- قسم المهارات التقنية -->
+    <section class="skills-section" data-aos="custom-fade-up">
+      <h2>🔧 المهارات التقنية</h2>
+      <div class="skills-grid">
+        <div class="skill-item" data-aos="custom-scale-in" data-aos-delay="100">
+          <h3>💻 تطوير التطبيقات</h3>
+          <ul class="skill-list">
+            <li><strong>JavaFX:</strong> بناء تطبيقات سطح المكتب بواجهات احترافية وتجربة مستخدم مميزة.</li>
+            <li><strong>Java EE:</strong> تطوير تطبيقات الويب باستخدام Java مع دعم للتكامل مع قواعد البيانات.</li>
+            <li><strong>Android (قيد التعلم):</strong> تصميم وتطوير تطبيقات الهاتف الذكي باستخدام Android Studio مع التركيز على الأداء وتجربة المستخدم.</li>
+          </ul>
+        </div>
+        <div class="skill-item" data-aos="custom-scale-in" data-aos-delay="200">
+          <h3>🗄️ إدارة قواعد البيانات</h3>
+          <ul class="skill-list">
+            <li><strong>MySQL:</strong> تصميم وإدارة قواعد بيانات قوية، مع التكامل مع API لإنشاء أنظمة متكاملة وموثوقة.</li>
+            <li><strong>Prisma:</strong> استخدام Prisma لربط قواعد البيانات بتطبيقات Next.js وتحقيق سرعة وكفاءة عالية في معالجة البيانات.</li>
+          </ul>
+        </div>
+        <div class="skill-item" data-aos="custom-scale-in" data-aos-delay="300">
+          <h3>🎨 التصميم وتجربة المستخدم</h3>
+          <ul class="skill-list">
+            <li>تصميم واجهات احترافية بألوان هادئة تعبر عن هوية العلامة التجارية.</li>
+            <li>تحقيق تجربة مستخدم سلسة من خلال تحسين تدفق العمليات وتقليل التعقيد.</li>
+            <li>استخدام Tailwind CSS وShadcn/ui لإنشاء تصاميم حديثة ومتجاوبة.</li>
+          </ul>
+        </div>
+        <div class="skill-item" data-aos="custom-scale-in" data-aos-delay="400">
+          <h3>🤖 الأتمتة والذكاء الاصطناعي</h3>
+          <ul class="skill-list">
+            <li>أتمتة العمليات باستخدام أدوات الذكاء الاصطناعي لتحسين الكفاءة وتقليل التكاليف.</li>
+            <li>تحليل البيانات باستخدام الذكاء الاصطناعي لتحسين تجربة المستخدم واتخاذ قرارات ذكية.</li>
+            <li>بناء أنظمة تتبع وتحليل تعتمد على الذكاء الاصطناعي لتحسين أداء التطبيقات.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- قسم المشاريع -->
+    <section class="projects-section" data-aos="custom-fade-up">
+      <h2>🚀 المشاريع الحالية</h2>
+      <div class="skills-grid">
+        <div class="skill-item project-item" data-aos="custom-fade-right" data-aos-delay="100">
+          <h3>🚌 تطوير تطبيق تتبع الحافلات (Bus Tracking Application)</h3>
+          <ul class="project-list">
+            <li data-aos="custom-fade-right" data-aos-delay="150">نظام متكامل لإدارة الحافلات وتتبع عدد الركاب بدقة.</li>
+            <li data-aos="custom-fade-right" data-aos-delay="180">حساب الإيرادات اليومية وتحليل أداء الحافلات لتحسين الكفاءة.</li>
+            <li data-aos="custom-fade-right" data-aos-delay="210">يعتمد على MySQL + API مع هيكلة مخصصة لضمان سرعة الوصول للبيانات واستقرارية الأداء.</li>
+            <li data-aos="custom-fade-right" data-aos-delay="240">دعم مستقبلي للتكامل مع تطبيقات الهواتف لتمكين أصحاب الحافلات من مراقبة الأساطيل بسهولة.</li>
+          </ul>
+        </div>
+        <div class="skill-item project-item" data-aos="custom-fade-right" data-aos-delay="300">
+          <h3>🤖 استكشاف مجال الأتمتة بالذكاء الاصطناعي (AI Automation)</h3>
+          <ul class="project-list">
+            <li data-aos="custom-fade-right" data-aos-delay="330">البحث والتعلم عن أحدث أدوات الأتمتة لتحسين العمليات وتقليل التكاليف.</li>
+            <li data-aos="custom-fade-right" data-aos-delay="360">استخدام الذكاء الاصطناعي لتحليل البيانات والتنبؤ بالاتجاهات.</li>
+            <li data-aos="custom-fade-right" data-aos-delay="390">تجربة تقنيات مثل RPA (Robotic Process Automation) وAI Chatbots لتحسين تجربة العملاء.</li>
+            <li data-aos="custom-fade-right" data-aos-delay="420">تطوير حلول مبتكرة لتحليل البيانات وتحسين أداء التطبيقات.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+
+
+    <!-- قسم معلومات الاتصال -->
+    <section class="contact-section" data-aos="custom-fade-up">
+      <h2>📩 معلومات الاتصال</h2>
+      <div class="contact-info">
+        <p data-aos="custom-fade-left" data-aos-delay="100">📧 البريد الإلكتروني: <a href="mailto: medev.codes@gmail.com">medev.codes@gmail.com</a></p>
+        <p data-aos="custom-fade-left" data-aos-delay="200">📞 رقم الهاتف: <a href="tel:+213675128306">+213675128306</a></p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // إضافة وظيفة تغيير اللغة
+    let currentLang = 'ar';
+
+    function updateContent(lang) {
+      currentLang = lang;
+      const t = translations[lang];
+
+      // تحديث عناصر القائمة (للحواسيب والأجهزة المحمولة)
+      document.querySelectorAll('.menu-items span, .mobile-menu-items span').forEach(item => {
+        const key = item.getAttribute('data-section').split('-')[0];
+        item.textContent = t.menu[key];
+      });
+
+      // تحديث زر التوظيف
+      const hireBtn = document.querySelector('.hire-me-btn');
+      const hireBtnMobile = document.querySelector('.hire-me-btn-mobile');
+      if (t.hireMe) {
+        if (hireBtn) hireBtn.textContent = t.hireMe;
+        if (hireBtnMobile) hireBtnMobile.textContent = t.hireMe;
+      }
+
+      // تحديث عناصر الساعة في نافبار الحاسوب
+      document.querySelector('#hours .label').textContent = t.clock.hours;
+      document.querySelector('#minutes .label').textContent = t.clock.minutes;
+      document.querySelector('#seconds .label').textContent = t.clock.seconds;
+
+      // تحديث عناصر الساعة في نافبار الهواتف
+      document.querySelector('#mobile-hours .label').textContent = t.clock.hours;
+      document.querySelector('#mobile-minutes .label').textContent = t.clock.minutes;
+      document.querySelector('#mobile-seconds .label').textContent = t.clock.seconds;
+
+      // تحديث مؤشر التمرير
+      document.querySelector('#scroll-down-indicator span').textContent = t.intro.scrollDown;
+
+      // تحديث قسم نبذة عني - About Me
+      document.querySelector('#about-title').textContent = t.about.title;
+      document.querySelector('#about-text').textContent = t.about.text;
+
+      // تحديث قسم الخبرة
+      document.querySelector('.experience-section h2').textContent = t.experience.title;
+      const expItems = document.querySelectorAll('.experience-item');
+
+      // تحديث عناوين الخبرة
+      expItems[0].querySelector('h3').textContent = t.experience.developer.title;
+      expItems[1].querySelector('h3').textContent = t.experience.marketing.title;
+
+      // تحديث عناصر قائمة الخبرة
+      const expDevList = expItems[0].querySelector('ul');
+      const marketingList = expItems[1].querySelector('ul');
+
+      // تحديث قائمة خبرة التطوير
+      expDevList.innerHTML = t.experience.developer.items.map(item => `<li>${item}</li>`).join('');
+
+      // تحديث قائمة خبرة التسويق
+      marketingList.innerHTML = t.experience.marketing.items.map(item => `<li>${item}</li>`).join('');
+
+      // تحديث قسم المهارات
+      document.querySelector('.skills-section h2').textContent = t.skills.title;
+      const skillItems = document.querySelectorAll('.skill-item');
+
+      // تحديث عناوين المهارات
+      skillItems[0].querySelector('h3').textContent = t.skills.development.title;
+      skillItems[1].querySelector('h3').textContent = t.skills.database.title;
+      skillItems[2].querySelector('h3').textContent = t.skills.design.title;
+      skillItems[3].querySelector('h3').textContent = t.skills.ai.title;
+
+      // تحديث قوائم المهارات
+      const devList = skillItems[0].querySelector('ul.skill-list');
+      const dbList = skillItems[1].querySelector('ul.skill-list');
+      const designList = skillItems[2].querySelector('ul.skill-list');
+      const aiList = skillItems[3].querySelector('ul.skill-list');
+
+      // تحديث قائمة تطوير التطبيقات
+      devList.innerHTML = t.skills.development.items.map(item => `<li>${item}</li>`).join('');
+
+      // تحديث قائمة إدارة قواعد البيانات
+      dbList.innerHTML = t.skills.database.items.map(item => `<li>${item}</li>`).join('');
+
+      // تحديث قائمة التصميم وتجربة المستخدم
+      designList.innerHTML = t.skills.design.items.map(item => `<li>${item}</li>`).join('');
+
+      // تحديث قائمة الأتمتة والذكاء الاصطناعي
+      aiList.innerHTML = t.skills.ai.items.map(item => `<li>${item}</li>`).join('');
+
+      // تحديث قسم المشاريع
+      document.querySelector('.projects-section h2').textContent = t.projects.title;
+      const projectItems = document.querySelectorAll('.project-item');
+
+      // تحديث عناوين المشاريع
+      projectItems[0].querySelector('h3').textContent = t.projects.busApp.title;
+      projectItems[1].querySelector('h3').textContent = t.projects.aiAutomation.title;
+
+      // تحديث قوائم المشاريع
+      const busAppList = projectItems[0].querySelector('ul');
+      const aiAutomationList = projectItems[1].querySelector('ul');
+
+      busAppList.innerHTML = t.projects.busApp.items.map(item => `<li>${item}</li>`).join('');
+      aiAutomationList.innerHTML = t.projects.aiAutomation.items.map(item => `<li>${item}</li>`).join('');
+
+
+
+      // تحديث قسم الاتصال
+      document.querySelector('.contact-section h2').textContent = t.contact.title;
+      const contactLabels = document.querySelectorAll('.contact-info p');
+      contactLabels[0].innerHTML = `📧 ${t.contact.email}: <a href="mailto:medev.codes@gmail.com">medev.codes@gmail.com</a>`;
+      contactLabels[1].innerHTML = `📞 ${t.contact.phone}: <a href="tel:+213675128306">+213675128306</a>`;
+
+      // تحديث اتجاه النص حسب اللغة - فقط للمحتوى الرئيسي وليس للنافبار
+      document.querySelector('.main-content').style.direction = lang === 'ar' ? 'rtl' : 'ltr';
+      // نتأكد من أن النافبار يبقى دائمًا من اليسار إلى اليمين
+      document.querySelector('.top-bar').style.direction = 'ltr';
+
+      // تحديث الأعلام في القائمة المنسدلة
+      const flagUrls = {
+        'ar': 'https://flagcdn.com/w40/sa.png',
+        'en': 'https://flagcdn.com/w40/gb.png',
+        'fr': 'https://flagcdn.com/w40/fr.png',
+        'es': 'https://flagcdn.com/w40/es.png',
+        'ru': 'https://flagcdn.com/w40/ru.png',
+        'zh': 'https://flagcdn.com/w40/cn.png',
+        'de': 'https://flagcdn.com/w40/de.png',
+        'it': 'https://flagcdn.com/w40/it.png'
+      };
+
+      // تحديث العلم في الزر الرئيسي
+      const currentFlag = document.getElementById('currentFlag');
+      if (currentFlag) {
+        currentFlag.src = flagUrls[lang];
+      }
+
+      // تحديث الأعلام في القائمة المنسدلة (للحواسيب)
+      document.querySelectorAll('.lang-option').forEach(btn => {
+        const btnLang = btn.getAttribute('data-lang');
+        const btnFlag = btn.querySelector('img');
+        if (btnFlag) {
+          btnFlag.src = flagUrls[btnLang];
+        }
+        btn.classList.toggle('active', btnLang === lang);
+      });
+
+      // تحديث الأعلام في القائمة المنسدلة (للهواتف)
+      document.querySelectorAll('.mobile-lang-option').forEach(btn => {
+        const btnLang = btn.getAttribute('data-lang');
+        const btnFlag = btn.querySelector('img');
+        if (btnFlag) {
+          btnFlag.src = flagUrls[btnLang];
+        }
+        btn.classList.toggle('active', btnLang === lang);
+      });
+
+      // حفظ اللغة المحددة
+      localStorage.setItem('selectedLanguage', lang);
+    }
+
+    // إضافة مستمعي الأحداث لأزرار اللغة
+    document.querySelectorAll('.lang-option').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const lang = btn.getAttribute('data-lang');
+        updateContent(lang);
+      });
+    });
+
+    // تحميل اللغة المفضلة عند بدء التشغيل
+    document.addEventListener('DOMContentLoaded', () => {
+      // التأكد من أن النافبار يبقى دائمًا من اليسار إلى اليمين بغض النظر عن اللغة
+      document.querySelector('.top-bar').style.direction = 'ltr';
+      document.querySelector('.menu-items').style.direction = 'ltr';
+      document.querySelector('.clock-container').style.direction = 'ltr';
+      document.querySelector('.language-menu').style.direction = 'ltr';
+
+      const savedLang = localStorage.getItem('selectedLanguage') || 'ar';
+      updateContent(savedLang);
+
+      // إضافة وظيفة التمرير للأسفل عند النقر على مؤشر التمرير
+      const scrollIndicator = document.getElementById('scroll-down-indicator');
+      if (scrollIndicator) {
+        scrollIndicator.addEventListener('click', function() {
+          const aboutSection = document.querySelector('.about-section');
+          if (aboutSection) {
+            // التمرير إلى القسم مع مراعاة ارتفاع النافبار
+            const isMobile = window.innerWidth <= 768;
+            const navbarHeight = isMobile ?
+              document.querySelector('.mobile-navbar').offsetHeight :
+              document.querySelector('.top-bar').offsetHeight;
+
+            const sectionTop = aboutSection.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
+            window.scrollTo({
+              top: sectionTop,
+              behavior: 'smooth'
+            });
+          }
+        });
+      }
+
+      // تأكد من تحديث النص حسب اللغة المحددة
+      const t = translations[savedLang];
+      if (t && t.intro) {
+        document.querySelector('#scroll-down-indicator span').textContent = t.intro.scrollDown;
+      }
+
+      // إضافة وظيفة فتح وإغلاق القائمة على الأجهزة المحمولة
+      const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+      const mobileMenu = document.getElementById('mobileMenu');
+
+      if (mobileMenuToggle && mobileMenu) {
+        mobileMenuToggle.addEventListener('click', function() {
+          this.classList.toggle('active');
+          mobileMenu.classList.toggle('active');
+        });
+
+        // إغلاق القائمة عند النقر على أي عنصر فيها وتنفيذ التمرير السلس
+        const mobileMenuItems = document.querySelectorAll('.mobile-menu-items span');
+        mobileMenuItems.forEach(item => {
+          item.addEventListener('click', function() {
+            // إغلاق القائمة
+            mobileMenuToggle.classList.remove('active');
+            mobileMenu.classList.remove('active');
+
+            // تنفيذ التمرير السلس إلى القسم المطلوب
+            const sectionId = this.getAttribute('data-section');
+            const section = document.querySelector(`.${sectionId}`);
+            if (section) {
+              // إضافة تأخير صغير للتأكد من إغلاق القائمة أولاً
+              setTimeout(() => {
+                // التمرير إلى القسم مع مراعاة ارتفاع النافبار
+                const navbarHeight = document.querySelector('.mobile-navbar').offsetHeight;
+                const sectionTop = section.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
+                window.scrollTo({
+                  top: sectionTop,
+                  behavior: 'smooth'
+                });
+              }, 300); // تأخير أطول للهواتف لضمان إغلاق القائمة المنسدلة
+            }
+          });
+        });
+
+        // إغلاق القائمة عند النقر على أي خيار لغة
+        const mobileLangOptions = document.querySelectorAll('.mobile-lang-option');
+        mobileLangOptions.forEach(option => {
+          option.addEventListener('click', function() {
+            const lang = this.getAttribute('data-lang');
+            updateContent(lang);
+
+            // تحديث حالة الخيارات النشطة
+            mobileLangOptions.forEach(opt => {
+              opt.classList.remove('active');
+            });
+            this.classList.add('active');
+
+            // إغلاق القائمة بعد اختيار اللغة
+            mobileMenuToggle.classList.remove('active');
+            mobileMenu.classList.remove('active');
+          });
+        });
+
+        // إغلاق القائمة عند تغيير حجم النافذة إلى حجم أكبر من الهاتف
+        window.addEventListener('resize', function() {
+          if (window.innerWidth > 768) {
+            mobileMenuToggle.classList.remove('active');
+            mobileMenu.classList.remove('active');
+          }
+        });
+      }
+    });
+
+    // دالة تحديث الساعة - محسنة
+    function updateClock() {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+      const milliseconds = now.getMilliseconds();
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+
+      // تحويل الساعات إلى نظام 12 ساعة
+      const displayHours = hours % 12 || 12; // استخدام 12 بدلاً من 0 للساعة 12
+
+      // تنسيق القيم
+      const hoursStr = String(displayHours).padStart(2, '0');
+      const minutesStr = String(minutes).padStart(2, '0');
+      const secondsStr = String(seconds).padStart(2, '0');
+
+      // تحديث ساعة الحاسوب
+      updateClockElements('hours', 'minutes', 'seconds', 'ampm', hoursStr, minutesStr, secondsStr, ampm);
+
+      // تحديث ساعة الهواتف
+      updateClockElements('mobile-hours', 'mobile-minutes', 'mobile-seconds', 'mobile-ampm', hoursStr, minutesStr, secondsStr, ampm);
+    }
+
+    // دالة مساعدة لتحديث عناصر الساعة
+    function updateClockElements(hoursId, minutesId, secondsId, ampmId, hoursStr, minutesStr, secondsStr, ampm) {
+      const hoursElement = document.getElementById(hoursId);
+      const minutesElement = document.getElementById(minutesId);
+      const secondsElement = document.getElementById(secondsId);
+      const ampmElement = document.getElementById(ampmId);
+
+      if (!hoursElement || !minutesElement || !secondsElement || !ampmElement) return;
+
+      // تحديث محتوى الساعة مع تأثير بصري عند التغيير
+      updateTimeValue(hoursElement.querySelector('.value'), hoursStr);
+      updateTimeValue(minutesElement.querySelector('.value'), minutesStr);
+      updateTimeValue(secondsElement.querySelector('.value'), secondsStr);
+
+      // تحديث AM/PM
+      if (ampmElement.textContent !== ampm) {
+        ampmElement.textContent = ampm;
+        ampmElement.style.animation = 'none';
+        void ampmElement.offsetWidth; // إعادة تشغيل الرسوم المتحركة
+        ampmElement.style.animation = 'pulse 0.5s ease';
+      }
+
+      // حساب نسبة التقدم للدوائر
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+      const milliseconds = now.getMilliseconds();
+      const displayHours = hours % 12 || 12;
+
+      const hoursProgress = ((displayHours + minutes / 60) / 12) * 100;
+      const minutesProgress = (minutes / 60) * 100;
+      const secondsProgress = ((seconds + milliseconds / 1000) / 60) * 100; // إضافة الميلي ثانية لحركة أكثر سلاسة
+
+      // تحديث دوائر التقدم
+      hoursElement.style.setProperty('--progress', hoursProgress);
+      minutesElement.style.setProperty('--progress', minutesProgress);
+      secondsElement.style.setProperty('--progress', secondsProgress);
+    }
+
+    // دالة مساعدة لتحديث قيمة الوقت مع تأثير بصري
+    function updateTimeValue(element, newValue) {
+      if (element.textContent !== newValue) {
+        element.style.animation = 'none';
+        void element.offsetWidth; // إعادة تشغيل الرسوم المتحركة
+        element.textContent = newValue;
+        element.style.animation = 'pulse 0.5s ease';
+      }
+    }
+
+    // تحديث دالة updateScrollProgress
+    function updateScrollProgress() {
+      const progressCircle = document.querySelector('.progress-circle .progress');
+
+      window.addEventListener('scroll', () => {
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight - windowHeight;
+        const scrolled = window.scrollY;
+        const progress = (scrolled / documentHeight);
+        const dashoffset = 69 * (1 - progress);
+
+        if (progressCircle) {
+          progressCircle.style.strokeDashoffset = dashoffset;
+        }
+      });
+    }
+
+    // تهيئة الساعة وشريط التقدم
+    setInterval(updateClock, 40); // تحديث أسرع للحصول على حركة أكثر سلاسة
+    updateClock();
+    updateScrollProgress();
+
+    // تأثير التحويم على القائمة وإضافة وظيفة التمرير السلس
+    const menuContainer = document.getElementById('menuContainer');
+    const menuItems = document.querySelectorAll('.menu-items span');
+
+    menuContainer.addEventListener('mouseenter', () => {
+      menuContainer.classList.add('expanded');
+    });
+
+    menuContainer.addEventListener('mouseleave', () => {
+      menuContainer.classList.remove('expanded');
+    });
+
+    // إضافة وظيفة التمرير السلس للقائمة
+    menuItems.forEach(item => {
+      item.addEventListener('click', (e) => {
+        const sectionId = e.target.getAttribute('data-section');
+        const section = document.querySelector(`.${sectionId}`);
+        if (section) {
+          // إضافة تأخير صغير للتأكد من إغلاق القائمة أولاً
+          setTimeout(() => {
+            // التمرير إلى القسم مع مراعاة ارتفاع النافبار
+            const navbarHeight = document.querySelector('.top-bar').offsetHeight;
+            const sectionTop = section.getBoundingClientRect().top + window.pageYOffset - navbarHeight;
+            window.scrollTo({
+              top: sectionTop,
+              behavior: 'smooth'
+            });
+          }, 50);
+        }
+      });
+    });
+
+    // تهيئة مكتبة AOS
+    AOS.init({
+      duration: 1200,
+      once: true,
+      offset: 150,
+      easing: 'ease-out-cubic',
+      delay: 100,
+      anchorPlacement: 'top-bottom'
+    });
+
+    // تحديد نوع الجهاز وعرض المجسم المناسب
+    function adjustSplineIframe() {
+      const desktopIframe = document.getElementById('desktop-spline-iframe');
+      const mobileIframe = document.getElementById('mobile-spline-iframe');
+      const isMobile = window.innerWidth <= 768;
+
+      if (desktopIframe && mobileIframe) {
+        // عرض المجسم المناسب حسب نوع الجهاز
+        if (isMobile) {
+          desktopIframe.style.display = 'none';
+          mobileIframe.style.display = 'block';
+          mobileIframe.style.position = 'fixed';
+          mobileIframe.style.top = '0';
+          mobileIframe.style.left = '0';
+          mobileIframe.style.width = '100%';
+          mobileIframe.style.height = '100%';
+        } else {
+          desktopIframe.style.display = 'block';
+          mobileIframe.style.display = 'none';
+        }
+      }
+    }
+
+    // تم إزالة دالة openEmailClient() لأننا نستخدم رابط mailto مباشرة
+
+    // تنفيذ الدالة عند تحميل الصفحة وتغيير حجم النافذة
+    window.addEventListener('load', function() {
+      adjustSplineIframe();
+
+      // لم نعد بحاجة إلى مستمع حدث لزر التوظيف لأننا نستخدم رابط mailto مباشرة
+
+      // إضافة مستمعي أحداث لتحميل المجسمات
+      const desktopIframe = document.getElementById('desktop-spline-iframe');
+      const mobileIframe = document.getElementById('mobile-spline-iframe');
+      const modelLoader = document.getElementById('model-loader');
+
+      // تتبع حالة تحميل المجسمات
+      let desktopLoaded = false;
+      let mobileLoaded = false;
+
+      // دالة للتحقق من اكتمال التحميل وإخفاء مؤشر التحميل
+      function checkLoading() {
+        const isMobile = window.innerWidth <= 768;
+
+        if ((isMobile && mobileLoaded) || (!isMobile && desktopLoaded)) {
+          if (modelLoader) {
+            modelLoader.style.display = 'none';
+          }
+        }
+      }
+
+      if (desktopIframe) {
+        desktopIframe.addEventListener('load', function() {
+          console.log('Desktop 3D model loaded');
+          desktopLoaded = true;
+
+          if (window.innerWidth > 768) {
+            desktopIframe.style.opacity = '1';
+            checkLoading();
+          }
+        });
+      }
+
+      if (mobileIframe) {
+        mobileIframe.addEventListener('load', function() {
+          console.log('Mobile 3D model loaded');
+          mobileLoaded = true;
+
+          if (window.innerWidth <= 768) {
+            mobileIframe.style.opacity = '1';
+            checkLoading();
+          }
+        });
+      }
+    });
+
+    window.addEventListener('resize', adjustSplineIframe);
+
+    // كود المجسم ثلاثي الأبعاد
+    let scene, camera, renderer, controls, model;
+    let isRotating = true;
+    let mouseX = 0;
+    let mouseY = 0;
+    let targetRotationX = 0;
+    let targetRotationY = 0;
+    let head = null;
+    let mixer = null;
+    let isMouseInSection = false;
+    let clock = new THREE.Clock();
+
+    function initModel() {
+      // إنشاء المشهد
+      scene = new THREE.Scene();
+      scene.background = null;
+
+      // إنشاء الكاميرا
+      const container = document.getElementById('intro-model-container');
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+
+      camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+      camera.position.z = 8; // تعديل موضع الكاميرا ليناسب المجسم الجديد
+
+      // إنشاء المحرك
+      renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true // تفعيل الشفافية
+      });
+      renderer.setClearColor(0x000000, 0); // جعل خلفية المحرك شفافة
+      renderer.setSize(width, height);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      container.appendChild(renderer.domElement);
+
+      // إضافة التحكم
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.minDistance = 3;
+      controls.maxDistance = 10;
+
+      // إضافة الإضاءة
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+      scene.add(ambientLight);
+
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+      directionalLight.position.set(5, 5, 5);
+      directionalLight.castShadow = true;
+      scene.add(directionalLight);
+
+      // إضافة نقطة إضاءة بيضاء
+      const pointLight = new THREE.PointLight(0xffffff, 2, 100);
+      pointLight.position.set(-5, -5, -5);
+      scene.add(pointLight);
+
+      // إضافة نقطة إضاءة بيضاء إضافية
+      const pointLight2 = new THREE.PointLight(0xffffff, 1.5, 100);
+      pointLight2.position.set(0, 0, 5);
+      scene.add(pointLight2);
+
+      // إضافة نقطة إضاءة بيضاء ثالثة
+      const pointLight3 = new THREE.PointLight(0xffffff, 1, 100);
+      pointLight3.position.set(5, -5, 0);
+      scene.add(pointLight3);
+
+      // إضافة نقطة إضاءة للتوهج الخلفي
+      const backGlowLight = new THREE.PointLight(0xffffff, 0.8, 100);
+      backGlowLight.position.set(0, -3, -5);
+      scene.add(backGlowLight);
+
+      // تحميل المجسم
+      const loader = new THREE.GLTFLoader();
+      loader.load(
+        'Dino1 Bot.glb',
+        function (gltf) {
+          model = gltf.scene;
+          model.scale.set(2, 2, 2);
+          model.position.set(0, -2, 0);
+
+          // إعداد الأنيميشن
+          mixer = new THREE.AnimationMixer(model);
+          const animations = gltf.animations;
+          if (animations && animations.length) {
+            const action = mixer.clipAction(animations[0]);
+            action.play();
+          }
+
+          // البحث عن مجموعة الرأس
+          model.traverse((node) => {
+            if (node.name === 'Cylinder001') {
+              head = node;
+              console.log('Found head group:', node.name);
+              console.log('Head children:', node.children.map(child => child.name).join(', '));
+            }
+            if (node.isMesh) {
+              node.castShadow = true;
+              node.receiveShadow = true;
+            }
+          });
+
+          scene.add(model);
+          console.log('Model loaded successfully');
+
+          // إخفاء مؤشر التحميل
+          const loadingIndicator = document.querySelector('.loading-indicator');
+          if (loadingIndicator) {
+            loadingIndicator.style.display = 'none';
+          }
+        },
+        function (xhr) {
+          const loadingIndicator = document.querySelector('.loading-indicator');
+          if (loadingIndicator) {
+            loadingIndicator.textContent = `جاري تحميل المجسم... ${Math.round((xhr.loaded / xhr.total) * 100)}%`;
+          }
+        },
+        function (error) {
+          console.error('An error occurred loading the model:', error);
+          const loadingIndicator = document.querySelector('.loading-indicator');
+          if (loadingIndicator) {
+            loadingIndicator.textContent = 'حدث خطأ أثناء تحميل المجسم';
+          }
+        }
+      );
+
+      // تغيير مستمع حركة الماوس من الحاوية إلى قسم المقدمة
+      const introSection = document.querySelector('.intro-section');
+      introSection.addEventListener('mousemove', onMouseMove);
+      introSection.addEventListener('mouseenter', () => {
+        isMouseInSection = true;
+        if (mixer) {
+          mixer.timeScale = 0;
+        }
+      });
+      introSection.addEventListener('mouseleave', () => {
+        isMouseInSection = false;
+        onMouseLeave();
+        if (mixer) {
+          mixer.timeScale = 1;
+        }
+      });
+
+      animate();
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      if (mixer) {
+        const delta = clock.getDelta();
+        mixer.update(delta);
+      }
+
+      if (model && head && isMouseInSection) {
+        const rotationSpeed = 0.05;
+
+        // حساب زوايا الدوران المستهدفة
+        const targetX = mouseY * Math.PI * 0.2;
+        const targetY = mouseX * Math.PI * 0.3;
+
+        // تطبيق الدوران بشكل تدريجي
+        head.rotation.x += (targetX - head.rotation.x) * rotationSpeed;
+        head.rotation.y += (targetY - head.rotation.y) * rotationSpeed;
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    function onMouseMove(event) {
+      if (!isMouseInSection) return;
+
+      const introSection = document.querySelector('.intro-section');
+      const rect = introSection.getBoundingClientRect();
+
+      mouseX = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      mouseY = ((event.clientY - rect.top) / rect.height) * 2 - 1;
+    }
+
+    function onMouseLeave() {
+      const rotationSpeed = 0.05;
+      if (head) {
+        head.rotation.x += (0 - head.rotation.x) * rotationSpeed;
+        head.rotation.y += (0 - head.rotation.y) * rotationSpeed;
+      }
+      mouseX = 0;
+      mouseY = 0;
+    }
+
+    function toggleRotation() {
+      isRotating = !isRotating;
+    }
+
+    function resetCamera() {
+      camera.position.set(0, 0, 5);
+      camera.lookAt(0, 0, 0);
+      controls.reset();
+    }
+
+    // تعديل حجم المجسم عند تغيير حجم النافذة
+    window.addEventListener('resize', onWindowResize, false);
+
+    function onWindowResize() {
+      const container = document.getElementById('intro-model-container');
+      const width = container.clientWidth;
+      const height = container.clientHeight;
+
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+    }
+
+    // تهيئة المجسم
+    initModel();
+  </script>
+</body>
+</html>
